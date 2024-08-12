@@ -245,6 +245,7 @@
     <div id="statusDisplay"></div>
 
     <script>
+<script>
 let allStatuses = JSON.parse(localStorage.getItem('allStatuses')) || {};
 let userMoods = JSON.parse(localStorage.getItem('userMoods')) || {};
 
@@ -316,45 +317,47 @@ function updateStatusDisplay() {
             <canvas id="moodChart-${userName}"></canvas>
             <div class="divider"></div>
         `;
-                drawMoodChart(userMoods[userName], `moodChart-${userName}`);
+        drawMoodChart(userMoods[userName], `moodChart-${userName}`);
+    });
+}
+
+function drawMoodChart(moodData, canvasId) {
+    if (!moodData || moodData.length === 0) return;
+    
+    const ctx = document.getElementById(canvasId).getContext('2d');
+    const data = moodData.map(data => parseInt(data.mood));
+
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(() => ""),  // Empty labels for x-axis
+            datasets: [{
+                label: 'Mood Over Time',
+                data: data,
+                borderColor: 'rgba(50, 255, 230, 0.8)',
+                backgroundColor: 'rgba(50, 255, 230, 0.1)',
+                borderWidth: 2,
+                pointRadius: 3,
+                pointBackgroundColor: 'rgba(255, 113, 86, 0.8)'
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    display: false  // Hide x-axis labels
+                },
+                y: {
+                    beginAtZero: true,
+                    suggestedMin: -10,
+                    suggestedMax: 10
+                }
             }
         }
+    });
+}
 
-        function drawMoodChart(moodData, canvasId) {
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            const data = moodData.map(data => data.mood);
-
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: data.map(() => ""),  // Empty labels for x-axis
-                    datasets: [{
-                        label: 'Mood Over Time',
-                        data: data,
-                        borderColor: 'rgba(50, 255, 230, 0.8)',
-                        backgroundColor: 'rgba(50, 255, 230, 0.1)',
-                        borderWidth: 2,
-                        pointRadius: 3,
-                        pointBackgroundColor: 'rgba(255, 113, 86, 0.8)'
-                    }]
-                },
-                options: {
-                    scales: {
-                        x: {
-                            display: false  // Hide x-axis labels
-                        },
-                        y: {
-                            beginAtZero: true,
-                            suggestedMin: -10,
-                            suggestedMax: 10
-                        }
-                    }
-                }
-            });
-        }
-
-        // Load the saved statuses and mood charts on page load
-        updateStatusDisplay();
-    </script>
+// Load the saved statuses and mood charts on page load
+updateStatusDisplay();
+</script>
 </body>
 </html>
