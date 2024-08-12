@@ -216,28 +216,7 @@
             <select id="mood" name="mood" required>
                 <option value="">Select Mood</option>
                 <!-- Dropdown options from -10 to 10 -->
-                ${Array.from({ length: 21 }, (_, i) => i - 10).map(value => `<option value="${value}">${value}</option>`).join('')}
-                <option value="10">10</option>
-                <option value="9">9</option>
-                <option value="8">8</option>
-                <option value="7">7</option>
-                <option value="6">6</option>
-                <option value="5">5</option>
-                <option value="4">4</option>
-                <option value="3">3</option>
-                <option value="2">2</option>
-                <option value="1">1</option>
-                <option value="0">0</option>
-                <option value="-1">-1</option>
-                <option value="-2">-2</option>
-                <option value="-3">-3</option>
-                <option value="-4">-4</option>
-                <option value="-5">-5</option>
-                <option value="-6">-6</option>
-                <option value="-7">-7</option>
-                <option value="-8">-8</option>
-                <option value="-9">-9</option>
-                <option value="-10">-10</option>
+                ${Array.from({ length: 21 }, (_, i) => `<option value="${10 - i}">${10 - i}</option>`).join('')}
             </select><br>
             <button type="submit">Submit</button>
         </form>
@@ -295,8 +274,8 @@
                     <p class="status-question">Voor het laatst bijgepakt om: <span class="status-answer">${userStatus.bijgepakt || 'Not provided'}</span></p>
                     <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
                     <p class="status-question">Huidige locatie: <span class="status-answer">${userStatus.locatie || 'Not provided'}</span></p>
-                    <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
                     <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
+                    <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
                     <canvas id="moodChart-${userName}"></canvas>
                     <div class="divider"></div>
                 `;
@@ -306,13 +285,12 @@
 
         function drawMoodChart(moodData, canvasId) {
             const ctx = document.getElementById(canvasId).getContext('2d');
-            const labels = moodData.map(data => data.timestamp);
             const data = moodData.map(data => data.mood);
 
             new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: data.map(() => ""),  // Empty labels for x-axis
                     datasets: [{
                         label: 'Mood Over Time',
                         data: data,
@@ -325,6 +303,9 @@
                 },
                 options: {
                     scales: {
+                        x: {
+                            display: false  // Hide x-axis labels
+                        },
                         y: {
                             beginAtZero: true,
                             suggestedMin: -10,
