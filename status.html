@@ -328,16 +328,34 @@ function updateStatusDisplay() {
         }
     });
 }
-
-// Make sure to call updateStatusDisplay when the page loads
-document.addEventListener('DOMContentLoaded', function() {
-    updateStatusDisplay();
-});
-
-// Also call updateStatusDisplay after submitting a new status
 document.getElementById('statusForm').addEventListener('submit', function(e) {
-    // ... (existing form submission code) ...
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const userName = formData.get('firstName');
+    localStorage.setItem('currentUserName', userName);
 
+    if (!allStatuses[userName]) {
+        allStatuses[userName] = {};
+    }
+
+    for (let [key, value] of formData.entries()) {
+        if (value && key !== 'firstName') {
+            allStatuses[userName][key] = value;
+        }
+    }
+
+    // Add timestamp to the status update
+    allStatuses[userName].lastUpdate = new Date().toISOString();
+
+    if (formData.get('mood')) {
+        if (!userMoods[userName]) {
+            userMoods[userName] = [];
+        }
+        userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
+    }
+
+    localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
+    localStorage.setItem('userMoods', JSON.stringify(userMoods));
     updateStatusDisplay();
     document.getElementById('updateForm').style.display = 'none';
 });
