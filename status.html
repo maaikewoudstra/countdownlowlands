@@ -295,13 +295,20 @@ function updateStatusDisplay() {
 
     // Sort users by their last update time
     const sortedUsers = Object.keys(allStatuses).sort((a, b) => {
-        return new Date(allStatuses[b].lastUpdate) - new Date(allStatuses[a].lastUpdate);
+        const dateA = allStatuses[a].lastUpdate ? new Date(allStatuses[a].lastUpdate) : new Date(0);
+        const dateB = allStatuses[b].lastUpdate ? new Date(allStatuses[b].lastUpdate) : new Date(0);
+        return dateB - dateA;
     });
+
+    if (sortedUsers.length === 0) {
+        display.innerHTML = '<p>No updates available.</p>';
+        return;
+    }
 
     sortedUsers.forEach(userName => {
         const userStatus = allStatuses[userName];
-        const lastUpdateDate = new Date(userStatus.lastUpdate);
-        const formattedDate = lastUpdateDate.toLocaleString();
+        const lastUpdateDate = userStatus.lastUpdate ? new Date(userStatus.lastUpdate) : 'Never';
+        const formattedDate = lastUpdateDate instanceof Date ? lastUpdateDate.toLocaleString() : lastUpdateDate;
 
         display.innerHTML += `
             <h2 class="status-heading">${userName}'s Status:</h2>
@@ -316,9 +323,24 @@ function updateStatusDisplay() {
             <canvas id="moodChart-${userName}"></canvas>
             <div class="divider"></div>
         `;
-        drawMoodChart(userMoods[userName], `moodChart-${userName}`);
+        if (userMoods[userName] && userMoods[userName].length > 0) {
+            drawMoodChart(userMoods[userName], `moodChart-${userName}`);
+        }
     });
 }
+
+// Make sure to call updateStatusDisplay when the page loads
+document.addEventListener('DOMContentLoaded', function() {
+    updateStatusDisplay();
+});
+
+// Also call updateStatusDisplay after submitting a new status
+document.getElementById('statusForm').addEventListener('submit', function(e) {
+    // ... (existing form submission code) ...
+
+    updateStatusDisplay();
+    document.getElementById('updateForm').style.display = 'none';
+});
 
 function drawMoodChart(moodData, canvasId) {
     if (!moodData || moodData.length === 0) return;
