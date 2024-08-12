@@ -213,7 +213,29 @@
             <label for="mood">Mood (from -10 to 10):</label><br>
             <select id="mood" name="mood" required>
                 <option value="">Select Mood</option>
+                <!-- Dropdown options from -10 to 10 -->
                 ${Array.from({ length: 21 }, (_, i) => i - 10).map(value => `<option value="${value}">${value}</option>`).join('')}
+                <option value="10">10</option>
+                <option value="9">9</option>
+                <option value="8">8</option>
+                <option value="7">7</option>
+                <option value="6">6</option>
+                <option value="5">5</option>
+                <option value="4">4</option>
+                <option value="3">3</option>
+                <option value="2">2</option>
+                <option value="1">1</option>
+                <option value="0">0</option>
+                <option value="-1">-1</option>
+                <option value="-2">-2</option>
+                <option value="-3">-3</option>
+                <option value="-4">-4</option>
+                <option value="-5">-5</option>
+                <option value="-6">-6</option>
+                <option value="-7">-7</option>
+                <option value="-8">-8</option>
+                <option value="-9">-9</option>
+                <option value="-10">-10</option>
             </select><br>
             <label for="weer">Comment over het weer:</label><br>
             <input type="text" id="weer" name="weer"><br>
