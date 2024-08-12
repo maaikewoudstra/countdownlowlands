@@ -180,6 +180,8 @@
             margin: 20px 0;
         }
     </style>
+<script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-database.js"></script>
 </head>
 <body>
     <!-- Hamburger Menu -->
@@ -245,8 +247,39 @@
     <div id="statusDisplay"></div>
 
 <script>
-let allStatuses = JSON.parse(localStorage.getItem('allStatuses')) || {};
-let userMoods = JSON.parse(localStorage.getItem('userMoods')) || {};
+// Replace the following with your app's Firebase project configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyCUa4FgUWR0_BmcST5DxtvqKLXoASxfxDs",
+    authDomain: "lowlands2024.firebaseapp.com",
+    databaseURL: "https://lowlands2024-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "lowlands2024",
+    storageBucket: "lowlands2024.appspot.com",
+    messagingSenderId: "508689713650",
+    appId: "1:508689713650:web:d47bdd773544a0df60436b"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = firebase.database(app);
+
+let allStatuses = {};
+let userMoods = {};
+
+function fetchUpdates() {
+    firebase.database().ref('/statuses').once('value').then(snapshot => {
+        if (snapshot.exists()) {
+            const data = snapshot.val();
+            allStatuses = data.allStatuses || {};
+            userMoods = data.userMoods || {};
+            updateStatusDisplay();
+        }
+    }).catch(error => console.error('Error fetching statuses:', error));
+}
+
+// Initial fetch of updates
+fetchUpdates();
+// Poll the server every 10 seconds to get the latest updates
+setInterval(fetchUpdates, 10000);
 
 document.getElementById('updateButton').addEventListener('click', function() {
     document.getElementById('updateForm').style.display = 'block';
@@ -263,29 +296,38 @@ document.getElementById('statusForm').addEventListener('submit', function(e) {
     const userName = formData.get('firstName');
     localStorage.setItem('currentUserName', userName);
 
+    let statusUpdate = {};
     if (!allStatuses[userName]) {
         allStatuses[userName] = {};
     }
 
     for (let [key, value] of formData.entries()) {
         if (value && key !== 'firstName') {
+            statusUpdate[key] = value;
             allStatuses[userName][key] = value;
         }
     }
 
-    // Add timestamp to the status update
-    allStatuses[userName].lastUpdate = new Date().toISOString();
+    statusUpdate.lastUpdate = new Date().toISOString();
+    allStatuses[userName].lastUpdate = statusUpdate.lastUpdate;
 
     if (formData.get('mood')) {
         if (!userMoods[userName]) {
             userMoods[userName] = [];
         }
         userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
+        statusUpdate.mood = formData.get('mood');
     }
 
-    localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
-    localStorage.setItem('userMoods', JSON.stringify(userMoods));
-    updateStatusDisplay();
+    // Update Firebase
+    firebase.database().ref('/statuses').set({
+        allStatuses: allStatuses,
+        userMoods: userMoods
+    }).then(() => {
+        console.log('Status updated successfully');
+        fetchUpdates(); // Refresh to ensure the latest data is displayed
+    }).catch(error => console.error('Error updating status:', error));
+
     document.getElementById('updateForm').style.display = 'none';
 });
 
@@ -328,37 +370,6 @@ function updateStatusDisplay() {
         }
     });
 }
-document.getElementById('statusForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const userName = formData.get('firstName');
-    localStorage.setItem('currentUserName', userName);
-
-    if (!allStatuses[userName]) {
-        allStatuses[userName] = {};
-    }
-
-    for (let [key, value] of formData.entries()) {
-        if (value && key !== 'firstName') {
-            allStatuses[userName][key] = value;
-        }
-    }
-
-    // Add timestamp to the status update
-    allStatuses[userName].lastUpdate = new Date().toISOString();
-
-    if (formData.get('mood')) {
-        if (!userMoods[userName]) {
-            userMoods[userName] = [];
-        }
-        userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
-    }
-
-    localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
-    localStorage.setItem('userMoods', JSON.stringify(userMoods));
-    updateStatusDisplay();
-    document.getElementById('updateForm').style.display = 'none';
-});
 
 function drawMoodChart(moodData, canvasId) {
     if (!moodData || moodData.length === 0) return;
@@ -394,9 +405,6 @@ function drawMoodChart(moodData, canvasId) {
         }
     });
 }
-
-// Load the saved statuses and mood charts on page load
-updateStatusDisplay();
 </script>
 </body>
 </html>
