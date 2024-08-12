@@ -6,15 +6,6 @@
     <title>Jaap's Lowlands 2024 Countdown</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        @font-face {
-          .vt323-regular {
-  font-family:'Press Start 2P', cursive;
-  font-weight: 400;
-  font-style: normal;
-}
-
-        }
-        
         :root {
             --color-primary: #ed47d4;
             --color-secondary: #ff9c00;
@@ -26,30 +17,43 @@
             text-align: center;
             background-color: #330012;
             color: var(--color-primary);
-            margin-top: 10px;
+            margin-top: 50px;
         }
         
         h1 {
             color: var(--color-secondary);
+            margin-bottom: 30px;
         }
         
         #countdown {
-            font-size: 6em;
-            margin-top: 5px;
+            font-size: 1.5em;
+            margin-top: 30px;
             color: var(--color-tertiary);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .countdown-item {
+            margin: 10px 0;
         }
         
         #header-image {
             max-width: 100%;
             height: auto;
-            margin-bottom: 5px;
+            margin-bottom: 20px;
         }
     </style>
 </head>
 <body>
-    <img id="header-image" src="PHOTO-2023-08-19-15-54-58.png" alt="Lowlands Festival">
+    <img id="header-image" src="path_to_your_image.jpg" alt="Lowlands Festival">
     <h1>Jaap's Lowlands 2024 Countdown</h1>
-    <div id="countdown"></div>
+    <div id="countdown">
+        <div id="days" class="countdown-item"></div>
+        <div id="hours" class="countdown-item"></div>
+        <div id="minutes" class="countdown-item"></div>
+        <div id="seconds" class="countdown-item"></div>
+    </div>
 
     <script>
         function updateCountdown() {
@@ -62,8 +66,10 @@
             const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-            document.getElementById("countdown").innerHTML = 
-                days + " days, " + hours + " hours, " + minutes + " minutes, " + seconds + " seconds";
+            document.getElementById("days").innerHTML = days + " days";
+            document.getElementById("hours").innerHTML = hours + " hours";
+            document.getElementById("minutes").innerHTML = minutes + " minutes";
+            document.getElementById("seconds").innerHTML = seconds + " seconds";
 
             if (timeLeft < 0) {
                 clearInterval(countdownTimer);
