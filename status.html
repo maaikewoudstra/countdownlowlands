@@ -250,8 +250,8 @@
 
         document.getElementById('updateButton').addEventListener('click', function() {
             document.getElementById('updateForm').style.display = 'block';
-            const userName = document.getElementById('firstName').value;
-            if (userName && allStatuses[userName]) {
+            const userName = localStorage.getItem('currentUserName') || '';
+            if (userName) {
                 document.getElementById('firstName').value = userName;
                 document.getElementById('firstName').readOnly = true;
             }
@@ -261,18 +261,24 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const userName = formData.get('firstName');
-            const moodData = { mood: formData.get('mood'), timestamp: new Date().toLocaleString() };
+            localStorage.setItem('currentUserName', userName);
 
-            // Update allStatuses and userMoods
-            allStatuses[userName] = {};
+            if (!allStatuses[userName]) {
+                allStatuses[userName] = {};
+            }
+
             for (let [key, value] of formData.entries()) {
-                if (value) allStatuses[userName][key] = value;
+                if (value && key !== 'firstName') {
+                    allStatuses[userName][key] = value;
+                }
             }
 
-            if (!userMoods[userName]) {
-                userMoods[userName] = [];
+            if (formData.get('mood')) {
+                if (!userMoods[userName]) {
+                    userMoods[userName] = [];
+                }
+                userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
             }
-            userMoods[userName].push(moodData);
 
             localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
             localStorage.setItem('userMoods', JSON.stringify(userMoods));
@@ -295,8 +301,8 @@
                     <p class="status-question">Voor het laatst bijgepakt om: <span class="status-answer">${userStatus.bijgepakt || 'Not provided'}</span></p>
                     <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
                     <p class="status-question">Huidige locatie: <span class="status-answer">${userStatus.locatie || 'Not provided'}</span></p>
-                    <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
                     <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
+                    <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
                     <canvas id="moodChart-${userName}"></canvas>
                     <div class="divider"></div>
                 `;
