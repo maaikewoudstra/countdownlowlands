@@ -48,8 +48,17 @@
             color: #32ffe6;
         }
         .divider {
-            border-top: 2px dotted #ed47d4;
+            border-top: 2px dotted white;
             margin: 20px 0;
+        }
+        .status-heading {
+            color: #32ffe6;
+        }
+        .status-question {
+            color: #32ffe6;
+        }
+        .status-answer {
+            color: #ff7156;
         }
     </style>
 </head>
@@ -101,11 +110,12 @@
             display.innerHTML = '';
             // Display the latest status
             display.innerHTML = `
-                <h2>${userStatus.firstName}'s Status:</h2>
-                <p>Hoogtepunt: ${userStatus.hoogtepunt || 'Not provided'}</p>
-                <p>Voor het laatst bijgepakt om: ${userStatus.bijgepakt || 'Not provided'}</p>
-                <p>Gaan slapen om: ${userStatus.slapen || 'Not provided'}</p>
-                <p>Mood: ${userStatus.mood || 'Not provided'}</p>
+                <h2 class="status-heading">${userStatus.firstName}'s Status:</h2>
+                <p class="status-question">Hoogtepunt: <span class="status-answer">${userStatus.hoogtepunt || 'Not provided'}</span></p>
+                <p class="status-question">Voor het laatst bijgepakt om: <span class="status-answer">${userStatus.bijgepakt || 'Not provided'}</span></p>
+                <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
+                <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
+                <div class="divider"></div>
             `;
         }
 
