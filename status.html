@@ -245,67 +245,77 @@
     <div id="statusDisplay"></div>
 
     <script>
-        let allStatuses = JSON.parse(localStorage.getItem('allStatuses')) || {};
-        let userMoods = JSON.parse(localStorage.getItem('userMoods')) || {};
+let allStatuses = JSON.parse(localStorage.getItem('allStatuses')) || {};
+let userMoods = JSON.parse(localStorage.getItem('userMoods')) || {};
 
-        document.getElementById('updateButton').addEventListener('click', function() {
-            document.getElementById('updateForm').style.display = 'block';
-            const userName = localStorage.getItem('currentUserName') || '';
-            if (userName) {
-                document.getElementById('firstName').value = userName;
-                document.getElementById('firstName').readOnly = true;
-            }
-        });
+document.getElementById('updateButton').addEventListener('click', function() {
+    document.getElementById('updateForm').style.display = 'block';
+    const userName = localStorage.getItem('currentUserName') || '';
+    if (userName) {
+        document.getElementById('firstName').value = userName;
+        document.getElementById('firstName').readOnly = true;
+    }
+});
 
-        document.getElementById('statusForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            const userName = formData.get('firstName');
-            localStorage.setItem('currentUserName', userName);
+document.getElementById('statusForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const userName = formData.get('firstName');
+    localStorage.setItem('currentUserName', userName);
 
-            if (!allStatuses[userName]) {
-                allStatuses[userName] = {};
-            }
+    if (!allStatuses[userName]) {
+        allStatuses[userName] = {};
+    }
 
-            for (let [key, value] of formData.entries()) {
-                if (value && key !== 'firstName') {
-                    allStatuses[userName][key] = value;
-                }
-            }
+    for (let [key, value] of formData.entries()) {
+        if (value && key !== 'firstName') {
+            allStatuses[userName][key] = value;
+        }
+    }
 
-            if (formData.get('mood')) {
-                if (!userMoods[userName]) {
-                    userMoods[userName] = [];
-                }
-                userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
-            }
+    // Add timestamp to the status update
+    allStatuses[userName].lastUpdate = new Date().toISOString();
 
-            localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
-            localStorage.setItem('userMoods', JSON.stringify(userMoods));
-            updateStatusDisplay(); // Immediately update the display with the new status
-            document.getElementById('updateForm').style.display = 'none';
-        });
+    if (formData.get('mood')) {
+        if (!userMoods[userName]) {
+            userMoods[userName] = [];
+        }
+        userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
+    }
 
-        function updateStatusDisplay() {
-            const display = document.getElementById('statusDisplay');
-            // Clear previous status display
-            display.innerHTML = '';
+    localStorage.setItem('allStatuses', JSON.stringify(allStatuses));
+    localStorage.setItem('userMoods', JSON.stringify(userMoods));
+    updateStatusDisplay();
+    document.getElementById('updateForm').style.display = 'none';
+});
 
-            // Display all users' statuses
-            for (let userName in allStatuses) {
-                const userStatus = allStatuses[userName];
-                display.innerHTML += `
-                    <h2 class="status-heading">${userName}'s Status:</h2>
-                    <p class="status-question">Hoogtepunt: <span class="status-answer">${userStatus.hoogtepunt || 'Not provided'}</span></p>
-                    <p class="status-question">Dieptepunt: <span class="status-answer">${userStatus.dieptepunt || 'Not provided'}</span></p>
-                    <p class="status-question">Voor het laatst bijgepakt om: <span class="status-answer">${userStatus.bijgepakt || 'Not provided'}</span></p>
-                    <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
-                    <p class="status-question">Huidige locatie: <span class="status-answer">${userStatus.locatie || 'Not provided'}</span></p>
-                    <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
-                    <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
-                    <canvas id="moodChart-${userName}"></canvas>
-                    <div class="divider"></div>
-                `;
+function updateStatusDisplay() {
+    const display = document.getElementById('statusDisplay');
+    display.innerHTML = '';
+
+    // Sort users by their last update time
+    const sortedUsers = Object.keys(allStatuses).sort((a, b) => {
+        return new Date(allStatuses[b].lastUpdate) - new Date(allStatuses[a].lastUpdate);
+    });
+
+    sortedUsers.forEach(userName => {
+        const userStatus = allStatuses[userName];
+        const lastUpdateDate = new Date(userStatus.lastUpdate);
+        const formattedDate = lastUpdateDate.toLocaleString();
+
+        display.innerHTML += `
+            <h2 class="status-heading">${userName}'s Status:</h2>
+            <p class="status-question">Last Updated: <span class="status-answer">${formattedDate}</span></p>
+            <p class="status-question">Hoogtepunt: <span class="status-answer">${userStatus.hoogtepunt || 'Not provided'}</span></p>
+            <p class="status-question">Dieptepunt: <span class="status-answer">${userStatus.dieptepunt || 'Not provided'}</span></p>
+            <p class="status-question">Voor het laatst bijgepakt om: <span class="status-answer">${userStatus.bijgepakt || 'Not provided'}</span></p>
+            <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
+            <p class="status-question">Huidige locatie: <span class="status-answer">${userStatus.locatie || 'Not provided'}</span></p>
+            <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
+            <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
+            <canvas id="moodChart-${userName}"></canvas>
+            <div class="divider"></div>
+        `;
                 drawMoodChart(userMoods[userName], `moodChart-${userName}`);
             }
         }
