@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Wat is de status?</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> <!-- Include Chart.js -->
     <style>
         :root {
             --color-primary: #2f23ff;
@@ -173,6 +174,11 @@
         .status-answer {
             color: #ff7156;
         }
+
+        canvas {
+            max-width: 100%;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -196,15 +202,15 @@
             <input type="text" id="firstName" name="firstName" required><br>
             <label for="hoogtepunt">Hoogtepunt:</label><br>
             <textarea id="hoogtepunt" name="hoogtepunt"></textarea><br>
-            <label for="hoogtepunt">Dieptepunt:</label><br>
+            <label for="dieptepunt">Dieptepunt:</label><br>
             <textarea id="dieptepunt" name="dieptepunt"></textarea><br>
             <label for="bijgepakt">Voor het laatst bijgepakt om:</label><br>
             <input type="time" id="bijgepakt" name="bijgepakt"><br>
             <label for="slapen">Gaan slapen om:</label><br>
             <input type="time" id="slapen" name="slapen"><br>
-            <label for="mood">Mood:</label><br>
-            <input type="text" id="mood" name="mood"><br>
-            <label for="mood">Comment over het weer:</label><br>
+            <label for="mood">Mood (from -10 to 10):</label><br>
+            <input type="number" id="mood" name="mood" min="-10" max="10" required><br>
+            <label for="weer">Comment over het weer:</label><br>
             <input type="text" id="weer" name="weer"><br>
             <button type="submit">Submit</button>
         </form>
@@ -213,6 +219,7 @@
 
     <script>
         let userStatus = JSON.parse(localStorage.getItem('userStatus')) || {};
+        let userMoods = JSON.parse(localStorage.getItem('userMoods')) || {};
 
         document.getElementById('updateButton').addEventListener('click', function() {
             document.getElementById('updateForm').style.display = 'block';
@@ -225,10 +232,20 @@
         document.getElementById('statusForm').addEventListener('submit', function(e) {
             e.preventDefault();
             const formData = new FormData(e.target);
+            const moodData = { mood: formData.get('mood'), timestamp: new Date().toLocaleString() };
+
+            // Update userStatus and userMoods
             for (let [key, value] of formData.entries()) {
                 if (value) userStatus[key] = value;
             }
+
+            if (!userMoods[userStatus.firstName]) {
+                userMoods[userStatus.firstName] = [];
+            }
+            userMoods[userStatus.firstName].push(moodData);
+
             localStorage.setItem('userStatus', JSON.stringify(userStatus));
+            localStorage.setItem('userMoods', JSON.stringify(userMoods));
             updateStatusDisplay(); // Immediately update the display with the new status
             document.getElementById('updateForm').style.display = 'none';
         });
@@ -246,11 +263,46 @@
                 <p class="status-question">Gaan slapen om: <span class="status-answer">${userStatus.slapen || 'Not provided'}</span></p>
                 <p class="status-question">Mood: <span class="status-answer">${userStatus.mood || 'Not provided'}</span></p>
                 <p class="status-question">Comment over het weer: <span class="status-answer">${userStatus.weer || 'Not provided'}</span></p>
+                <canvas id="moodChart"></canvas>
                 <div class="divider"></div>
             `;
+
+            // Draw the mood chart
+            drawMoodChart(userMoods[userStatus.firstName]);
         }
 
-        // Load the saved status on page load
+        function drawMoodChart(moodData) {
+            const ctx = document.getElementById('moodChart').getContext('2d');
+            const labels = moodData.map(data => data.timestamp);
+            const data = moodData.map(data => data.mood);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Mood Over Time',
+                        data: data,
+                        borderColor: 'rgba(50, 255, 230, 0.8)',
+                        backgroundColor: 'rgba(50, 255, 230, 0.1)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(255, 113, 86, 0.8)'
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMin: -10,
+                            suggestedMax: 10
+                        }
+                    }
+                }
+            });
+        }
+
+        // Load the saved status and mood chart on page load
         if (userStatus.firstName) {
             updateStatusDisplay();
         }
