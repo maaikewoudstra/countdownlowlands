@@ -14,7 +14,7 @@
             padding: 20px;
         }
         h1 {
-            color: #ff9c00;
+            color: #2f23ff;
         }
         button {
             background-color: #fd0;
@@ -42,6 +42,14 @@
             margin: 8px 0;
             box-sizing: border-box;
             font-family: 'Press Start 2P', cursive;
+            color: #ff7156;
+        }
+        label {
+            color: #32ffe6;
+        }
+        .divider {
+            border-top: 2px dotted #ed47d4;
+            margin: 20px 0;
         }
     </style>
 </head>
@@ -88,12 +96,13 @@
 
         function updateStatusDisplay() {
             const display = document.getElementById('statusDisplay');
-            display.innerHTML = `
+            display.innerHTML += `
                 <h2>${userStatus.firstName}'s Status:</h2>
                 <p>Hoogtepunt: ${userStatus.hoogtepunt || 'Not provided'}</p>
                 <p>Voor het laatst bijgepakt om: ${userStatus.bijgepakt || 'Not provided'}</p>
                 <p>Gaan slapen om: ${userStatus.slapen || 'Not provided'}</p>
                 <p>Mood: ${userStatus.mood || 'Not provided'}</p>
+                <div class="divider"></div>
             `;
         }
     </script>
