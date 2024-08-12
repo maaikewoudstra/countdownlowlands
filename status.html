@@ -332,105 +332,6 @@
     document.getElementById('updateForm').style.display = 'none';
   });
 
-  function updateStatusDisplay() {
-    // ... (keep the existing updateStatusDisplay function)
-  }
-
-  function drawMoodChart(moodData, canvasId) {
-    // ... (keep the existing drawMoodChart function)
-  }
-
-  // Make functions available globally
-  window.fetchUpdates = fetchUpdates;
-  window.updateStatusDisplay = updateStatusDisplay;
-  window.drawMoodChart = drawMoodChart;
-</script>
-    
-    <script>
-// Replace the following with your app's Firebase project configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyCUa4FgUWR0_BmcST5DxtvqKLXoASxfxDs",
-    authDomain: "lowlands2024.firebaseapp.com",
-    databaseURL: "https://lowlands2024-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "lowlands2024",
-    storageBucket: "lowlands2024.appspot.com",
-    messagingSenderId: "508689713650",
-    appId: "1:508689713650:web:d47bdd773544a0df60436b"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const database = getDatabase(app);
-
-let allStatuses = {};
-let userMoods = {};
-
-function fetchUpdates() {
-    getDatabase(app).ref('/statuses').once('value').then(snapshot => {
-        if (snapshot.exists()) {
-            const data = snapshot.val();
-            allStatuses = data.allStatuses || {};
-            userMoods = data.userMoods || {};
-            updateStatusDisplay();
-        }
-    }).catch(error => console.error('Error fetching statuses:', error));
-}
-
-// Initial fetch of updates
-fetchUpdates();
-// Poll the server every 10 seconds to get the latest updates
-setInterval(fetchUpdates, 10000);
-
-document.getElementById('updateButton').addEventListener('click', function() {
-    document.getElementById('updateForm').style.display = 'block';
-    const userName = localStorage.getItem('currentUserName') || '';
-    if (userName) {
-        document.getElementById('firstName').value = userName;
-        document.getElementById('firstName').readOnly = true;
-    }
-});
-
-document.getElementById('statusForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const userName = formData.get('firstName');
-    localStorage.setItem('currentUserName', userName);
-
-    let statusUpdate = {};
-    if (!allStatuses[userName]) {
-        allStatuses[userName] = {};
-    }
-
-    for (let [key, value] of formData.entries()) {
-        if (value && key !== 'firstName') {
-            statusUpdate[key] = value;
-            allStatuses[userName][key] = value;
-        }
-    }
-
-    statusUpdate.lastUpdate = new Date().toISOString();
-    allStatuses[userName].lastUpdate = statusUpdate.lastUpdate;
-
-    if (formData.get('mood')) {
-        if (!userMoods[userName]) {
-            userMoods[userName] = [];
-        }
-        userMoods[userName].push({ mood: formData.get('mood'), timestamp: new Date().toLocaleString() });
-        statusUpdate.mood = formData.get('mood');
-    }
-
-    // Update Firebase
-    firebase.database().ref('/statuses').set({
-        allStatuses: allStatuses,
-        userMoods: userMoods
-    }).then(() => {
-        console.log('Status updated successfully');
-        fetchUpdates(); // Refresh to ensure the latest data is displayed
-    }).catch(error => console.error('Error updating status:', error));
-
-    document.getElementById('updateForm').style.display = 'none';
-});
-
 function updateStatusDisplay() {
     const display = document.getElementById('statusDisplay');
     display.innerHTML = '';
@@ -505,6 +406,22 @@ function drawMoodChart(moodData, canvasId) {
         }
     });
 }
+
+  // Make functions available globally
+  window.fetchUpdates = fetchUpdates;
+  window.updateStatusDisplay = updateStatusDisplay;
+  window.drawMoodChart = drawMoodChart;
+</script>
+    
+    <script>
+// Replace the following with your app's Firebase project configuration
+const firebaseConfig = {
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+
 </script>
 </body>
 </html>
