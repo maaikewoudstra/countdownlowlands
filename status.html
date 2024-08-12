@@ -91,7 +91,7 @@
                 if (value) userStatus[key] = value;
             }
             localStorage.setItem('userStatus', JSON.stringify(userStatus));
-            updateStatusDisplay();
+            updateStatusDisplay(); // Immediately update the display with the new status
             document.getElementById('updateForm').style.display = 'none';
         });
 
