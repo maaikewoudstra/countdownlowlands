@@ -37,7 +37,10 @@
         .countdown-item {
             margin: 10px 0;
         }
-        
+        h2 {
+            color: var(--color-tertiary);
+            margin-bottom: 30px;
+        }
         #header-image {
             max-width: 100%;
             height: auto;
@@ -54,7 +57,7 @@
         <div id="minutes" class="countdown-item"></div>
         <div id="seconds" class="countdown-item"></div>
     </div>
-
+    <h2>Kamp KabelGOAT</h2>
     <script>
         function updateCountdown() {
             const festivalStart = new Date("2024-08-15T06:00:00").getTime();
