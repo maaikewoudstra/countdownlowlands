@@ -74,7 +74,7 @@
     <div id="statusDisplay"></div>
 
     <script>
-        let userStatus = {};
+        let userStatus = JSON.parse(localStorage.getItem('userStatus')) || {};
 
         document.getElementById('updateButton').addEventListener('click', function() {
             document.getElementById('updateForm').style.display = 'block';
@@ -90,6 +90,7 @@
             for (let [key, value] of formData.entries()) {
                 if (value) userStatus[key] = value;
             }
+            localStorage.setItem('userStatus', JSON.stringify(userStatus));
             updateStatusDisplay();
             document.getElementById('updateForm').style.display = 'none';
         });
@@ -104,6 +105,11 @@
                 <p>Mood: ${userStatus.mood || 'Not provided'}</p>
                 <div class="divider"></div>
             `;
+        }
+
+        // Load the saved status on page load
+        if (userStatus.firstName) {
+            updateStatusDisplay();
         }
     </script>
 </body>
