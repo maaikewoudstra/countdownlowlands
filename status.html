@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wat is de status?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: #330012;
+            color: #ed47d4;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #ff9c00;
+        }
+        button {
+            background-color: #fd0;
+            border: none;
+            color: #330012;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+        }
+        #updateForm, #statusDisplay {
+            margin-top: 20px;
+            text-align: left;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px 20px;
+            margin: 8px 0;
+            box-sizing: border-box;
+            font-family: 'Press Start 2P', cursive;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wat is de status?</h1>
+    <button id="updateButton">Update</button>
+    <div id="updateForm" style="display:none;">
+        <form id="statusForm">
+            <label for="firstName">First name:</label><br>
+            <input type="text" id="firstName" name="firstName" required><br>
+            <label for="hoogtepunt">Hoogtepunt:</label><br>
+            <textarea id="hoogtepunt" name="hoogtepunt"></textarea><br>
+            <label for="bijgepakt">Voor het laatst bijgepakt om:</label><br>
+            <input type="time" id="bijgepakt" name="bijgepakt"><br>
+            <label for="slapen">Gaan slapen om:</label><br>
+            <input type="time" id="slapen" name="slapen"><br>
+            <label for="mood">Mood:</label><br>
+            <input type="text" id="mood" name="mood"><br>
+            <button type="submit">Submit</button>
+        </form>
+    </div>
+    <div id="statusDisplay"></div>
+
+    <script>
+        let userStatus = {};
+
+        document.getElementById('updateButton').addEventListener('click', function() {
+            document.getElementById('updateForm').style.display = 'block';
+            if (userStatus.firstName) {
+                document.getElementById('firstName').value = userStatus.firstName;
+                document.getElementById('firstName').readOnly = true;
+            }
+        });
+
+        document.getElementById('statusForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            for (let [key, value] of formData.entries()) {
+                if (value) userStatus[key] = value;
+            }
+            updateStatusDisplay();
+            document.getElementById('updateForm').style.display = 'none';
+        });
+
+        function updateStatusDisplay() {
+            const display = document.getElementById('statusDisplay');
+            display.innerHTML = `
+                <h2>${userStatus.firstName}'s Status:</h2>
+                <p>Hoogtepunt: ${userStatus.hoogtepunt || 'Not provided'}</p>
+                <p>Voor het laatst bijgepakt om: ${userStatus.bijgepakt || 'Not provided'}</p>
+                <p>Gaan slapen om: ${userStatus.slapen || 'Not provided'}</p>
+                <p>Mood: ${userStatus.mood || 'Not provided'}</p>
+            `;
+        }
+    </script>
+</body>
+</html>
